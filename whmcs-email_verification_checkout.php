@@ -38,15 +38,12 @@ function fetchAccounts($days) {
         ->get();
 }
 
-# Hook to prevent orders from unverified accounts
+# Prevent orders from unverified accounts
 add_hook("ShoppingCartValidateCheckout", 1, function($vars) {
     if (VERIFY_EMAIL_ORDERS === true) {
         $client = Menu::context("client");
         if (!is_null($client) && $client) {
             if ($client->isEmailAddressVerified() == false) {
-                if ($vars['cart']->getCount() > 0) {
-                    $vars['cart']->clear();
-                }
                 return array("<b>Before proceeding with your order, please verify your email.</b>");
             }
         }
