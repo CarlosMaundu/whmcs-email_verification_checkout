@@ -37,8 +37,11 @@ function fetchAccounts($days) {
 
 // Hook for setting a session variable when a client logs in, denoting their email verification status
 add_hook('ClientLogin', 1, function($vars) {
+    // Fetch the user information based on login
     $userId = $vars['userid'];
     $user = Capsule::table('tblclients')->where('id', $userId)->first();
+
+    // Set a session variable for email verification
     $_SESSION['email_verified'] = $user->email_verified;
 });
 
@@ -86,7 +89,8 @@ add_hook('ClientAreaPage', 1, function($vars) {
     $currentPage = $vars['filename'];
 
     if ($currentPage == 'cart') {
-        $custType = filter_input(INPUT_POST, 'custtype', FILTER_SANITIZE_STRING);
+        $custType = $_POST['custtype'];
+        $custType = filter_var($custType, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         if ($custType == 'account' || $custType == 'existing') {
             if (!isEmailVerified($vars['clientsdetails']['email'])) {
@@ -96,9 +100,11 @@ add_hook('ClientAreaPage', 1, function($vars) {
     }
 });
 
-// Hook to unset the session variable after the checkout
+// Unset the session variable and destroy the session after the checkout
 add_hook('AfterShoppingCartCheckout', 1, function($vars) {
     unset($_SESSION['email_verified']);
+    // Destroy the session after checkout
+    session_destroy();
 });
 
 // Function to check if a client's email is verified
