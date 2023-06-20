@@ -46,7 +46,12 @@ add_hook('ClientLogin', 1, function($vars) {
 // Verifies the client's email if VERIFY_EMAIL_ORDERS is set to true
 add_hook("ShoppingCartValidateCheckout", 1, function($vars) {
     if (VERIFY_EMAIL_ORDERS === true) {
-        if (isset($_SESSION['email_verified']) && $_SESSION['email_verified'] == 0) {
+        // Capture the client information 
+        $client = Menu::context("client");
+
+        // Check if the client information exists and the email is not verified
+        if (!is_null($client) && $client && (!isset($_SESSION['email_verified']) || $_SESSION['email_verified'] == 0)) {
+            // If not verified, then display a message to verify email
             return array("<b>Before proceeding with your order, please verify your email.</b>");
         }
     }
